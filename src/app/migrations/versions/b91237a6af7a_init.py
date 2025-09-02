@@ -1,8 +1,8 @@
-"""initial
+"""init
 
-Revision ID: 7d77637291ee
+Revision ID: b91237a6af7a
 Revises: 
-Create Date: 2025-08-23 18:09:06.304493
+Create Date: 2025-09-02 14:03:19.857159
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '7d77637291ee'
+revision: str = 'b91237a6af7a'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.Column('street', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('images',
+    op.create_table('image',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('image', postgresql.BYTEA(), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -63,7 +63,7 @@ def upgrade() -> None:
     sa.Column('address_id', sa.UUID(), nullable=False),
     sa.Column('image_id', sa.UUID(), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], ),
-    sa.ForeignKeyConstraint(['image_id'], ['images.id'], ),
+    sa.ForeignKeyConstraint(['image_id'], ['image.id'], ),
     sa.ForeignKeyConstraint(['supplier_id'], ['supplier.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -76,6 +76,6 @@ def downgrade() -> None:
     op.drop_table('product')
     op.drop_table('supplier')
     op.drop_table('client')
-    op.drop_table('images')
+    op.drop_table('image')
     op.drop_table('address')
     # ### end Alembic commands ###

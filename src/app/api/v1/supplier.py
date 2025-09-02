@@ -4,8 +4,8 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chemes.supplier import SupplierRequest, SupplierResponse, SupplierUpdate
-from chemes.address import AddressRequest
+from schemes.supplier import SupplierRequest, SupplierResponse, SupplierUpdate
+from schemes.address import AddressRequest
 from repositories.supplier import SupplierRepository
 from repositories.address import AddressRepository
 from db.database import get_async_session

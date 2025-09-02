@@ -10,7 +10,7 @@ from alembic import context
 from db import Base
 from config.setting import settings
 
-from models import Client, Address, Images, Product, Supplier
+from models import Client, Address, Image, Product, Supplier
 
 config = context.config
 

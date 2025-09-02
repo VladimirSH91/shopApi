@@ -12,7 +12,7 @@ class BaseRepository(ABC):
     async def create(self, data):
         new_md = self.model(**data)
         self.db_session.add(new_md)
-        await self.db_session.commit()
+        await self.db_session.flush()
         await self.db_session.refresh(new_md)
         return new_md
 

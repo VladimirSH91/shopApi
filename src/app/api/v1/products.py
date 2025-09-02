@@ -4,9 +4,9 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chemes.product import ProductRequest, ProductResponce, ProductUpdate
-from chemes.address import AddressRequest
-from chemes.supplier import SupplierRequest
+from schemes.product import ProductRequest, ProductResponce, ProductUpdate
+from schemes.address import AddressRequest
+from schemes.supplier import SupplierRequest
 from repositories.product import ProductRepository
 from repositories.address import AddressRepository
 from repositories.supplier import SupplierRepository
