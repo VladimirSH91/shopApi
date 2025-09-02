@@ -18,16 +18,17 @@ async def add_image(product_id: UUID,
     if not image_bytes:
         raise HTTPException(status_code=404, detail="Image is empty")
 
-    product_repo = ProductRepository(db_session=db_session)
-    product = await product_repo.get_by_id(product_id)
+    async with db_session.begin():
+        product_repo = ProductRepository(db_session=db_session)
+        product = await product_repo.get_by_id(product_id)
 
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
     
-    image_repo = ImageRepository(db_session=db_session)
-    image = await image_repo.create({"image": image_bytes})
+        image_repo = ImageRepository(db_session=db_session)
+        image = await image_repo.create({"image": image_bytes})
 
-    await product_repo.update(product, {'image_id': image.id})
+        await product_repo.update(product, {'image_id': image.id})
 
     return ImageResponse(id=image.id)
 

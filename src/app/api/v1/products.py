@@ -20,21 +20,23 @@ async def add_product(product_data: ProductRequest,
                       address_data: AddressRequest,
                       supplier_data: SupplierRequest,
                       db_session: AsyncSession = Depends(get_async_session)):
-    address_repo = AddressRepository(db_session=db_session)
-    address_dict = address_data.model_dump()
-    address = await address_repo.create(address_dict)
+    async with db_session.begin():
+        address_repo = AddressRepository(db_session=db_session)
+        address_dict = address_data.model_dump()
+        address = await address_repo.create(address_dict)
 
-    supplier_repo = SupplierRepository(db_session=db_session)
-    supplier_dict = supplier_data.model_dump()
-    supplier_dict["address_id"] = address.id
-    supplier = await supplier_repo.create(supplier_dict)
+        supplier_repo = SupplierRepository(db_session=db_session)
+        supplier_dict = supplier_data.model_dump()
+        supplier_dict["address_id"] = address.id
+        supplier = await supplier_repo.create(supplier_dict)
 
-    product_repo = ProductRepository(db_session=db_session)
-    product_dict = product_data.model_dump()
-    product_dict["address_id"] = address.id
-    product_dict['supplier_id'] = supplier.id # руками не вводятся обычно
-    product_dict['image_id'] = None 
-    product = await product_repo.create(product_dict)
+        product_repo = ProductRepository(db_session=db_session)
+        product_dict = product_data.model_dump()
+        product_dict["address_id"] = address.id
+        product_dict['supplier_id'] = supplier.id
+        product_dict['image_id'] = None 
+        product = await product_repo.create(product_dict)
+        
     return product
 
 

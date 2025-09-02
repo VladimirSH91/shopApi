@@ -18,19 +18,19 @@ client_router = APIRouter()
 async def add_client(data: ClientRequest, 
                      address_data: AddressRequest, 
                      db_session: AsyncSession = Depends(get_async_session)):
-    address_repo = AddressRepository(db_session)
-    address_dict = address_data.model_dump()
-    address = await address_repo.create(address_dict)
+    
+    async with db_session.begin():
+        address_repo = AddressRepository(db_session)
+        address_dict = address_data.model_dump()
+        address = await address_repo.create(address_dict)
 
-    client_repo = ClientRepository(db_session)
-    client_dict = data.model_dump()
-    client_dict['address_id'] = address.id
-    client = await client_repo.create(client_dict)
+        client_repo = ClientRepository(db_session)
+        client_dict = data.model_dump()
+        client_dict['address_id'] = address.id
+        client = await client_repo.create(client_dict)
+
     return client
 
-# @todo тут и в аналогичных функциях. Есть проблемы с транзакционностью, разобраться как решить
-
-# @todo почитать про транзакционность
 
 # Получение клиентов по имени и фамилии
 @client_router.get("/client/search", response_model=List[ClientResponse], status_code=200)
@@ -48,7 +48,7 @@ async def delete_client(client_id: UUID, db_session: AsyncSession = Depends(get_
     client_db = ClientRepository(db_session)
     client = await client_db.get_by_id(client_id)
     if client:
-        await client_db.delete(client)
+        client_db.delete(client)
     else:
         raise HTTPException(status_code=404, detail="Client not found")
 

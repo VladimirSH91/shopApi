@@ -17,14 +17,16 @@ supplier_router = APIRouter()
 async def add_supplier(data: SupplierRequest,
                        address_data: AddressRequest,
                        db_session: AsyncSession = Depends(get_async_session)):
-    address_repo = AddressRepository(db_session=db_session)
-    address_dict = address_data.model_dump()
-    address = await address_repo.create(address_dict)
+    async with db_session.begin():
+        address_repo = AddressRepository(db_session=db_session)
+        address_dict = address_data.model_dump()
+        address = await address_repo.create(address_dict)
 
-    supplier_repo = SupplierRepository(db_session=db_session)
-    supplier_dict = data.model_dump()
-    supplier_dict["address_id"] = address.id
-    supplier = await supplier_repo.create(supplier_dict)
+        supplier_repo = SupplierRepository(db_session=db_session)
+        supplier_dict = data.model_dump()
+        supplier_dict["address_id"] = address.id
+        supplier = await supplier_repo.create(supplier_dict)
+        
     return [supplier]
 
 
