@@ -1,8 +1,8 @@
 from uuid import UUID
 from pydantic import BaseModel
 
-class ImagesRequest(BaseModel):
+class ImageRequest(BaseModel):
     image: bytes
 
-class ImagesResponse(BaseModel):
+class ImageResponse(BaseModel):
     id: UUID

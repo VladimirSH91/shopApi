@@ -20,7 +20,7 @@ class Product(Base):
     supplier_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('supplier.id'), nullable=False)
     address_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('address.id'), nullable=False) 
     image_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), 
-                                                ForeignKey('images.id'), nullable=True)
+                                                ForeignKey('image.id'), nullable=True)
 
     supplier = relationship(argument='Supplier', back_populates='product')
-    images = relationship(argument='Images', back_populates='product')
+    image = relationship(argument='Image', back_populates='product')
