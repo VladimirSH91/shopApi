@@ -43,11 +43,12 @@ async def update_image(image_id: UUID,
     if not image_bytes:
         raise HTTPException(status_code=404, detail="Image is empty")
     
-    image_repo = ImageRepository(db_session=db_session)
-    image = await image_repo.get_by_id(id=image_id)
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
-    await image_repo.update(image, {"image": image_bytes})
+    async with db_session.begin():
+        image_repo = ImageRepository(db_session=db_session)
+        image = await image_repo.get_by_id(id=image_id)
+        if not image:
+            raise HTTPException(status_code=404, detail="Image not found")
+        await image_repo.update(image, {"image": image_bytes})
 
     return ImageResponse(id=image.id)
 
@@ -82,10 +83,11 @@ async def get_product_image_by_id(product_id: UUID, db_session: AsyncSession = D
 
 @image_router.delete("/image/{image_id}")
 async def delete_image(image_id: UUID, db_session: AsyncSession = Depends(get_async_session)):
-    image_repo = ImageRepository(db_session=db_session)
-    image = await image_repo.get_by_id(id=image_id)
+    async with db_session.begin():
+        image_repo = ImageRepository(db_session=db_session)
+        image = await image_repo.get_by_id(id=image_id)
 
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
+        if not image:
+            raise HTTPException(status_code=404, detail="Image not found")
     
-    await image_repo.delete(image)
+        await image_repo.delete(image)

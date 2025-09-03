@@ -20,14 +20,14 @@ class BaseRepository(ABC):
         for key, value in update_data.items():
             setattr(data, key, value)
 
-        await self.db_session.commit()
+        await self.db_session.flush()
         await self.db_session.refresh(data)
         return data
 
 
     async def delete(self, data) -> None:
         await self.db_session.delete(data)
-        await self.db_session.commit()
+        await self.db_session.flush()
 
     async def get_all(self, 
                       limit: Optional[int] = None, 

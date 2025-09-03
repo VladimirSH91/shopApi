@@ -59,10 +59,11 @@ async def get_all(
 
 @product_router.delete("/product/")
 async def delet_product(product_id: UUID, db_session: AsyncSession = Depends(get_async_session)):
-    product_repo = ProductRepository(db_session=db_session)
-    product = await product_repo.get_by_id(id=product_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    async with db_session.begin():
+        product_repo = ProductRepository(db_session=db_session)
+        product = await product_repo.get_by_id(id=product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
     
 
 @product_router.patch("/product/", response_model=ProductResponce)
@@ -70,19 +71,21 @@ async def update_product(product_id: UUID,
                          count: int, 
                          update_data: ProductUpdate ,
                          db_session: AsyncSession = Depends(get_async_session)):
-    product_repo = ProductRepository(db_session=db_session)
-    product = await product_repo.get_by_id(id=product_id)
+    async with db_session.begin():
+        product_repo = ProductRepository(db_session=db_session)
+        product = await product_repo.get_by_id(id=product_id)
 
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
     
-    update_dict = update_data.model_dump()
-    result = product.available_stock - count
-    if result < 0:
-        raise HTTPException(status_code=404, detail="Недостаточно остатков")
-    update_dict['available_stock'] = result
-    update_dict['supplier_id'] = product.supplier_id
-    update_dict['image_id'] = product.image_id
-    update_dict['id'] = product.id
-    await product_repo.update(product, update_data=update_dict)
+        update_dict = update_data.model_dump()
+        result = product.available_stock - count
+        if result < 0:
+            raise HTTPException(status_code=404, detail="Недостаточно остатков")
+        update_dict['available_stock'] = result
+        update_dict['supplier_id'] = product.supplier_id
+        update_dict['image_id'] = product.image_id
+        update_dict['id'] = product.id
+        await product_repo.update(product, update_data=update_dict)
+        
     return update_dict

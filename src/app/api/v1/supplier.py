@@ -13,7 +13,7 @@ from db.database import get_async_session
 supplier_router = APIRouter()
 
 
-@supplier_router.post('/supplier/', response_model=List[SupplierResponse], status_code=200)
+@supplier_router.post('/supplier/', response_model=List[SupplierResponse], status_code=201)
 async def add_supplier(data: SupplierRequest,
                        address_data: AddressRequest,
                        db_session: AsyncSession = Depends(get_async_session)):
@@ -32,12 +32,13 @@ async def add_supplier(data: SupplierRequest,
 
 @supplier_router.delete("/supplier/{supplier_id}")
 async def delete(id: UUID, db_session: AsyncSession = Depends(get_async_session)):
-    supplier_repo = SupplierRepository(db_session=db_session)
-    supplier = await supplier_repo.get_by_id(id)
-    if supplier:
-        await supplier_repo.delete(supplier)
-    else:
-        raise HTTPException(status_code=404, detail="Supplier not found")
+    async with db_session.begin():
+        supplier_repo = SupplierRepository(db_session=db_session)
+        supplier = await supplier_repo.get_by_id(id)
+        if supplier:
+            await supplier_repo.delete(supplier)
+        else:
+            raise HTTPException(status_code=404, detail="Supplier not found")
     
 
 @supplier_router.get("/supplier/{id}", response_model=SupplierResponse)
@@ -65,16 +66,17 @@ async def get_all(
 async def update_supplier_adddress(supplier_id: UUID,
                                    update_data: SupplierUpdate, 
                                    db_session: AsyncSession = Depends(get_async_session)):
-    supplier = SupplierRepository(db_session=db_session)
+    async with db_session.begin():
+        supplier = SupplierRepository(db_session=db_session)
 
-    data_supplier = await supplier.get_by_id(supplier_id)
-    if not data_supplier:
-        raise HTTPException(status_code=404, detail="Supplier not found")
+        data_supplier = await supplier.get_by_id(supplier_id)
+        if not data_supplier:
+            raise HTTPException(status_code=404, detail="Supplier not found")
 
-    address = AddressRepository(db_session=db_session)
-    update_dict = update_data.model_dump()
-    update_address = await address.create(update_dict['address']) 
-    update_dict.pop('address', None)
-    update_dict['address_id'] = update_address.id
-    await supplier.update(data_supplier, update_dict)
+        address = AddressRepository(db_session=db_session)
+        update_dict = update_data.model_dump()
+        update_address = await address.create(update_dict['address']) 
+        update_dict.pop('address', None)
+        update_dict['address_id'] = update_address.id
+        await supplier.update(data_supplier, update_dict)
     return update_address
